@@ -16,7 +16,7 @@ def get_project(project_id: int):
 
 
 @app.get("/projects")
-def list_projects(name: str | None):
+def list_projects(name: str | None = None):
     projects = list(mock_database.values())
     if name is None:
         return projects
