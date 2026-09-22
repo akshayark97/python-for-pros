@@ -1,0 +1,23 @@
+[project]
+name = "release-tracker"
+version = "0.1.0"
+description = "A release tracking application to track Projects and Tasks"
+readme = "README.md"
+authors = [
+    { email = "akshayark97.ar@gmail.com" }
+]
+requires-python = "==3.14.*"
+dependencies = [
+    "fastapi[standard]>=0.115.0",
+]
+
+[tool.fastapi]
+entrypoint = "release_tracker.main:app"
+
+[build-system]
+requires = ["uv_build>=0.12.1,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "release_tracker"
+module-root = "src"
