@@ -1,17 +1,33 @@
 from fastapi.testclient import TestClient
+from release_tracker.main import app
 
-# Import the FastAPI 'app' instance from our main cod
-from release_tracker.main import app  # type: ignore[import-untyped]
-
-# Create a TestClient using our app
 client = TestClient(app)
 
+
 def test_list_projects():
-    # Simulate a GET request to the /projects URL
     response = client.get("/projects")
-
-    # Assert that the HTTP status code is 200 (Success)
     assert response.status_code == 200
-
-    # Assert that the JSON response body is a list with 1 item
     assert len(response.json()) == 3
+
+
+def test_list_projects_by_slug():
+    # EXERCISE STEP 3:
+    # Update this test to send `slug=api-v2` instead of `name=API v2`,
+    # so it matches the new slug-based search endpoint.
+    response = client.get("/projects", params={"slug": "api-v2"})
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 1
+    assert data[0]["slug"] == "api-v2"
+
+
+def test_get_project():
+    response = client.get("/projects/1")
+    assert response.status_code == 200
+    assert response.json()["name"] == "Frontend Redesign"
+
+
+def test_get_project_not_found():
+    response = client.get("/projects/999")
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Project not found"
