@@ -1,14 +1,29 @@
+from datetime import UTC, datetime
+
 from fastapi import FastAPI, HTTPException, status
-from pydantic import BaseModel
+
+from .models import ProjectRead
 
 app = FastAPI(title="Release Tracker API")
 
+_seed_time = datetime(2026, 1, 1, tzinfo=UTC)
 
-class ProjectRead(BaseModel):
-    id: int
-    name: str
-    slug: str
-
+# A simple mock database for now
+mock_database: dict[int, ProjectRead] = {
+    1: ProjectRead(
+        id=1,
+        name="Frontend Redesign",
+        slug="frontend-redesign",
+        created_at=_seed_time,
+    ),
+    2: ProjectRead(id=2, name="API v2", slug="api-v2", created_at=_seed_time),
+    3: ProjectRead(
+        id=3,
+        name="Database Migration",
+        slug="database-migration",
+        created_at=_seed_time,
+    ),
+}
 
 @app.get("/projects/{project_id}", response_model=ProjectRead)
 def get_project(project_id: int):
@@ -34,9 +49,3 @@ def list_projects(slug: str | None = None):
     if slug is None:
         return projects
     return [p for p in projects if slug == p.slug]
-
-mock_database: dict[int, ProjectRead] = {
-    1: ProjectRead(id=1, name="Frontend Redesign", slug="frontend-redesign"),
-    2: ProjectRead(id=2, name="API v2", slug="api-v2"),
-    3: ProjectRead(id=3, name="Database Migration", slug="database-migration"),
-}
