@@ -1,10 +1,11 @@
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, Response, status
-from sqlmodel import Session, select
+from sqlmodel import Session
 
+from . import crud
 from .database import get_session
-from .models import Project, ProjectCreate, ProjectRead, ProjectUpdate
+from .models import ProjectCreate, ProjectRead, ProjectUpdate
 
 app = FastAPI(
     title="Release Tracker API",
@@ -19,25 +20,27 @@ def slugify(value: str) -> str:
     return "-".join(cleaned.split()) or "project"
 
 
+@app.get("/")
+def read_root() -> dict[str, str]:
+    return {
+        "app": "Release Tracker API",
+        "docs": "/docs",
+        "health": "/health",
+    }
+
+
 @app.get("/projects", response_model=list[ProjectRead])
 def list_projects(session: SessionDep):
-    statement = select(Project).order_by(Project.name)
-    projects = session.exec(statement).all()
-    return list(projects)
+    return crud.list_projects(session)
 
 
 @app.get("/projects/{project_id}", response_model=ProjectRead)
 def get_project(project_id: int, session: SessionDep):
-    # if query is less use below
-    project = session.get(Project, project_id)
-
-    # if the query grow more complex
-    # project = session.exec(select(Project).where(Project.slug == project_id)).one()
+    project = crud.get_project(session, project_id)
 
     if not project:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Project not found",
+            status_code=status.HTTP_404_NOT_FOUND, detail="Project not found"
         )
     return project
 
@@ -46,55 +49,27 @@ def get_project(project_id: int, session: SessionDep):
     "/projects", response_model=ProjectRead, status_code=status.HTTP_201_CREATED
 )
 def create_project(payload: ProjectCreate, session: SessionDep):
-    project = Project.model_validate(
-        payload, update={"slug": slugify(payload.name)}
-    )
-    session.add(project)
-    session.commit()
-    session.refresh(project)
-    return project
+    return crud.create_project(session, payload)
 
 
 @app.patch("/projects/{project_id}", response_model=ProjectRead)
 def update_project(
     project_id: int, payload: ProjectUpdate, session: SessionDep
 ):
-    project = session.get(Project, project_id)
+    project = crud.get_project(session, project_id)
     if not project:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Project not found"
         )
-
-    updated_fields = payload.model_dump(
-        exclude_unset=True # exclude_unset=True ensures we only update fields the client explicitly sent in their request.
-    )
-    project.sqlmodel_update(updated_fields)
-
-    if "name" in updated_fields and updated_fields["name"] is not None:
-        project.slug = slugify(updated_fields["name"])
-
-    session.add(project)
-    session.commit()
-    session.refresh(project)
-    return project
+    return crud.update_project(session, project, payload)
 
 
 @app.delete("/projects/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_project(project_id: int, session: SessionDep):
-    project = session.get(Project, project_id)
+    project = crud.get_project(session, project_id)
     if not project:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Project not found"
         )
-    session.delete(project)
-    session.commit()
+    crud.delete_project(session, project)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
-
-
-@app.get("/")
-def read_root() -> dict[str, str]:
-    return {
-        "app": "Release Tracker API",
-        "docs": "/docs",
-        "health": "/health",
-    }
