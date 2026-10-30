@@ -5,6 +5,7 @@ from sqlmodel import Session
 
 from . import crud
 from .database import get_session
+from .dependencies import ProjectDep
 from .models import ProjectCreate, ProjectRead, ProjectUpdate
 
 app = FastAPI(
@@ -35,13 +36,7 @@ def list_projects(session: SessionDep):
 
 
 @app.get("/projects/{project_id}", response_model=ProjectRead)
-def get_project(project_id: int, session: SessionDep):
-    project = crud.get_project(session, project_id)
-
-    if not project:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Project not found"
-        )
+def get_project(project: ProjectDep):
     return project
 
 
