@@ -8,6 +8,7 @@ from ..models import ProjectCreate, ProjectRead, ProjectUpdate
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 
+
 @router.get("/", response_model=list[ProjectRead])
 def list_projects(session: SessionDep):
     return crud.list_projects(session)
@@ -19,13 +20,13 @@ def get_project(project: ProjectDep):
 
 
 @router.post(
-    "/projects", response_model=ProjectRead, status_code=status.HTTP_201_CREATED
+    "/", response_model=ProjectRead, status_code=status.HTTP_201_CREATED
 )
 def create_project(payload: ProjectCreate, session: SessionDep):
     return crud.create_project(session, payload)
 
 
-@router.patch("/projects/{project_id}", response_model=ProjectRead)
+@router.patch("/{project_id}", response_model=ProjectRead)
 def update_project(
     project_id: int, payload: ProjectUpdate, session: SessionDep
 ):
@@ -37,7 +38,7 @@ def update_project(
     return crud.update_project(session, project, payload)
 
 
-@router.delete("/projects/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_project(project_id: int, session: SessionDep):
     project = crud.get_project(session, project_id)
     if not project:
