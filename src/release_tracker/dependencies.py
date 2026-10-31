@@ -13,7 +13,7 @@ SessionDep = Annotated[Session, Depends(get_session)]
 def get_project_or_404(project_id: int, session: SessionDep) -> Project:
     project = crud.get_project(session, project_id)
 
-    if not project:
+    if project is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Project not found"
         )
