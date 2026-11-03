@@ -1,3 +1,4 @@
+import logging
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, Request, status
@@ -5,8 +6,12 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session
 
+from .config import configure_logging, get_settings
 from .database import get_session
 from .routers import projects
+
+configure_logging(debug=get_settings().debug)
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Release Tracker API",
