@@ -1,4 +1,5 @@
 import logging
+import time
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, Request, status
@@ -17,6 +18,29 @@ app = FastAPI(
     title="Release Tracker API",
     description="An API for tracking project milestones and developer tasks.",
 )
+
+# @app.middleware("http")
+# async def my_middleware(request: Request, call_next):
+#     # Pre-route work happens here (before the endpoint is called)
+#     response = await call_next(request)
+#     # Post-route work happends here (after the endpoint finishes)
+#     return response
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start_time = time.perf_counter()
+    response = await call_next(request)
+    process_time = (time.perf_counter() - start_time) * 1000
+
+    logger.info(
+        "%s %s completed in %.2fms with status code %s",
+        request.method,
+        request.url.path,
+        process_time,
+        response.status_code
+    )
+    return response
+
 
 app.include_router(projects.router)
 
