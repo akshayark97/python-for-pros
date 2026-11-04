@@ -1,5 +1,4 @@
 from sqlmodel import Session, select
-from fastapi import HTTPException, status
 
 from .models import Project, ProjectCreate, ProjectUpdate
 
