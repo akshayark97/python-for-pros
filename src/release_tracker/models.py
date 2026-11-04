@@ -25,46 +25,18 @@ class TaskPriority(StrEnum):
     urgent = "urgent"
 
 
-TaskTitle = Annotated[
-    str,
-    StringConstraints(strip_whitespace=True, min_length=2)
-]
-
-
-class TaskBase(SQLModel):
-    title: TaskTitle
-    details: str | None = None
-    status: TaskStatus = TaskStatus.planned
-    priority: TaskPriority = TaskPriority.medium
-    due_date: date | None = None
-
-
-class Task(TaskBase, table=True):
-    __tablename__ = "tasks"
-
-    id: int | None = Field(default=None, primary_key=True)
-    project_id: int = Field(foreign_key="projects.id", index=True)
-
-    project: Project = Relationship(back_populates="tasks")
-
 ProjectName = Annotated[
     str,
     StringConstraints(strip_whitespace=True, min_length=2),
 ]
 
-class TaskCreate(TaskBase):
-    pass
+TaskTitle = Annotated[
+    str,
+    StringConstraints(strip_whitespace=True, min_length=2),
+]
 
-class TaskUpdate(SQLModel):
-    title: TaskTitle | None = None
-    details: str | None = None
-    status: TaskStatus | None = None
-    priority: TaskPriority | None = None
-    due_date: date | None = None
 
-class TaskRead(TaskBase):
-    id: int
-    project_id: int
+# --- Project ---
 
 
 class ProjectBase(SQLModel):
@@ -78,7 +50,7 @@ class Project(ProjectBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     slug: str = Field(unique=True)
 
-    tasks: list[Task] = Relationship(back_populates="project") # back_populates="project" tells SQLModel that Project.tasks and Task.project are the two sides of the same relationship
+    tasks: list[Task] = Relationship(back_populates="project")
 
     created_at: datetime = Field(
         default_factory=utc_now,
@@ -99,3 +71,42 @@ class ProjectRead(ProjectBase):
     id: int
     slug: str
     created_at: datetime
+
+
+# --- Task ---
+
+
+class TaskBase(SQLModel):
+    title: TaskTitle
+    details: str | None = None
+    status: TaskStatus = TaskStatus.planned
+    priority: TaskPriority = TaskPriority.medium
+    due_date: date | None = None
+
+
+class Task(TaskBase, table=True):
+    __tablename__ = "tasks"
+
+    id: int | None = Field(default=None, primary_key=True)
+    project_id: int = Field(foreign_key="projects.id", index=True)
+
+    project: Project = Relationship(back_populates="tasks")
+
+
+class TaskCreate(TaskBase):
+    pass
+
+
+class TaskUpdate(SQLModel):
+    title: TaskTitle | None = None
+    details: str | None = None
+    status: TaskStatus | None = None
+    priority: TaskPriority | None = None
+    due_date: date | None = None
+
+
+class TaskRead(TaskBase):
+    id: int
+    project_id: int
+    project_name: str
+    project_slug: str
