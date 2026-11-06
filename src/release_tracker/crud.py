@@ -99,7 +99,7 @@ def list_tasks(
 def get_task(session: Session, task_id: int) -> Task | None:
     statement = (
         select(Task)
-        .options(selectinload(Task.project))  # type: ignore[args-type]
+        .options(selectinload(Task.project))  # type: ignore[arg-type]
         .where(Task.id == task_id)
     )
     return session.exec(statement).first()

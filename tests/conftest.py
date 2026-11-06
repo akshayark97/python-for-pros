@@ -44,3 +44,18 @@ def sample_project_id(client: TestClient) -> int:
     )
     assert response.status_code == 201
     return response.json()["id"]
+
+
+@pytest.fixture()
+def sample_task_id(client: TestClient, sample_project_id: int) -> int:
+    response = client.post(
+        f"/projects/{sample_project_id}/tasks",
+        json={
+            "title": "Wire up the dashboard",
+            "details": "Connect the API to the static frontend",
+            "status": "planned",
+            "priority": "medium",
+        },
+    )
+    assert response.status_code == 201
+    return response.json()["id"]
