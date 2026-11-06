@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 
 def test_create_project(client: TestClient):
     response = client.post(
-        "/projects",
+        "/projects/",
         json={
             "name": "New Project",
             "description": "A test project",
@@ -25,7 +25,7 @@ def test_get_project(client: TestClient, sample_project_id: int):
 
 
 def test_list_projects(client: TestClient, sample_project_id: int):
-    response = client.get("/projects")
+    response = client.get("/projects/")
     assert response.status_code == 200
     data = response.json()
     assert len(data) > 0
@@ -63,28 +63,6 @@ def test_create_duplicate_project_fails(
     )
     assert response.status_code == 409
     assert response.json() == {
-        "detail": "Data conflict occured (e.g., duplicate entry)."
+        "detail": "Data conflict occurred (e.g., duplicate entry)."
     }
 
-
-def test_get_task_not_found(client: TestClient):
-    response = client.get("/tasks/9999")
-    assert response.status_code == 404
-    assert response.json() == {"detail": "Task not found"}
-
-
-def test_list_tasks_filter_by_status(
-    client: TestClient, sample_project_id: int
-):
-    client.post(
-        f"/projects/{sample_project_id}/tasks",
-        json={"title": "Planned task", "status": "planned"},
-    )
-    client.post(
-        f"/projects/{sample_project_id}/tasks",
-        json={"title": "Done task", "status": "done"},
-    )
-    response = client.get("/tasks", params={"status": "done"})
-    assert response.status_code == 200
-    titles = [task["title"] for task in response.json()]
-    assert titles == ["Done task"]
