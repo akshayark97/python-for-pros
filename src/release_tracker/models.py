@@ -92,6 +92,13 @@ class Task(TaskBase, table=True):
 
     project: Project = Relationship(back_populates="tasks")
 
+    @property
+    def project_name(self) -> str:
+        return self.project.name
+
+    @property
+    def project_slug(self) -> str:
+        return self.project.slug
 
 class TaskCreate(TaskBase):
     pass
