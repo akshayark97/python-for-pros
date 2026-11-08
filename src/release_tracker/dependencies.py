@@ -5,10 +5,11 @@ from sqlmodel import Session
 
 from . import crud
 from .database import get_session
-from .models import Project, Task
+from .models import Project, Task, User
+from .security import get_current_user
 
 SessionDep = Annotated[Session, Depends(get_session)]
-
+CurrentUserDep = Annotated[User, Depends(get_current_user)]
 
 def get_project_or_404(project_id: int, session: SessionDep) -> Project:
     project = crud.get_project(session, project_id)

@@ -3,7 +3,7 @@ from typing import Any
 from fastapi import APIRouter, Response, status
 
 from release_tracker import crud
-from release_tracker.dependencies import ProjectDep, SessionDep
+from release_tracker.dependencies import CurrentUserDep, ProjectDep, SessionDep
 from release_tracker.models import ProjectCreate, ProjectRead, ProjectUpdate
 
 router = APIRouter(prefix="/projects", tags=["projects"])
@@ -22,7 +22,9 @@ def get_project(project: ProjectDep) -> Any:
 @router.post(
     "/", response_model=ProjectRead, status_code=status.HTTP_201_CREATED
 )
-def create_project(payload: ProjectCreate, session: SessionDep) -> Any:
+def create_project(
+    payload: ProjectCreate, session: SessionDep, current_user: CurrentUserDep
+) -> Any:
     return crud.create_project(session, payload)
 
 
