@@ -1,6 +1,6 @@
 from datetime import UTC, date, datetime
 from enum import StrEnum
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import EmailStr, StringConstraints
 from sqlalchemy import Column, DateTime
@@ -140,3 +140,10 @@ class User(UserBase, table=True):
 
 class UserRead(UserBase):
     id: int
+
+
+# --- Auth ---
+
+class AccessToken(SQLModel):
+    access_token: str
+    token_type: Literal["bearer"] = "bearer"

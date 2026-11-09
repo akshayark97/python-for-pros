@@ -12,6 +12,8 @@ from . import models
 from .config import get_settings
 from .database import get_session
 
+# In a production app, ACCESS_TOKEN_EXPIRE_MINUTES belongs in environment
+# settings, and the auth flow would also include token refresh.
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 JWT_ALGORITHM = "HS256"
 

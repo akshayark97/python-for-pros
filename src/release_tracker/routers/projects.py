@@ -30,12 +30,17 @@ def create_project(
 
 @router.patch("/{project_id}", response_model=ProjectRead)
 def update_project(
-    project: ProjectDep, payload: ProjectUpdate, session: SessionDep
+    current_user: CurrentUserDep,
+    project: ProjectDep,
+    payload: ProjectUpdate,
+    session: SessionDep,
 ) -> Any:
     return crud.update_project(session, project, payload)
 
 
 @router.delete("/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_project(project: ProjectDep, session: SessionDep) -> Response:
+def delete_project(
+    current_user: CurrentUserDep, project: ProjectDep, session: SessionDep
+) -> Response:
     crud.delete_project(session, project)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

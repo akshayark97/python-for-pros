@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError
 
 from .config import configure_logging, get_settings
-from .routers import projects, tasks
+from .routers import auth, projects, tasks
 
 configure_logging(debug=get_settings().debug)
 logger = logging.getLogger(__name__)
@@ -17,12 +17,15 @@ app = FastAPI(
     description="An API for tracking project milestones and developer tasks.",
 )
 
+app.include_router(auth.router)
 app.include_router(projects.router)
 app.include_router(tasks.router)
 
 
 @app.exception_handler(IntegrityError)
-def handle_integrity_error(request: Request, exc: IntegrityError):
+def handle_integrity_error(
+    request: Request, exc: IntegrityError
+) -> JSONResponse:
     logger.warning(
         "IntegrityError handled method=%s path=%s",
         request.method,

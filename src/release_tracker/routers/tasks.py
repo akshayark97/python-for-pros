@@ -3,7 +3,12 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Query, Response, status
 
 from release_tracker import crud
-from release_tracker.dependencies import ProjectDep, SessionDep, TaskDep
+from release_tracker.dependencies import (
+    CurrentUserDep,
+    ProjectDep,
+    SessionDep,
+    TaskDep,
+)
 from release_tracker.models import (
     TaskCreate,
     TaskPriority,
@@ -42,7 +47,10 @@ def list_tasks(
     status_code=status.HTTP_201_CREATED,
 )
 def create_task(
-    project: ProjectDep, payload: TaskCreate, session: SessionDep
+    current_user: CurrentUserDep,
+    project: ProjectDep,
+    payload: TaskCreate,
+    session: SessionDep,
 ) -> Any:
     return crud.create_task(session, project.id, payload)
 
@@ -53,11 +61,18 @@ def get_task(task: TaskDep) -> Any:
 
 
 @router.patch("/tasks/{task_id}", response_model=TaskRead)
-def update_task(task: TaskDep, payload: TaskUpdate, session: SessionDep) -> Any:
+def update_task(
+    current_user: CurrentUserDep,
+    task: TaskDep,
+    payload: TaskUpdate,
+    session: SessionDep,
+) -> Any:
     return crud.update_task(session, task, payload)
 
 
 @router.delete("/tasks/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_task(task: TaskDep, session: SessionDep) -> Response:
+def delete_task(
+    current_user: CurrentUserDep, task: TaskDep, session: SessionDep
+) -> Response:
     crud.delete_task(session, task)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
