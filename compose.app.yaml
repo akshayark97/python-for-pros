@@ -1,6 +1,6 @@
 services:
   web:
-    build:
+    build: .
     environment:
       DATABASE_URL: postgresql+psycopg://release_tracker:release_tracker@db:5432/release_tracker
       DEBUG: "true"
@@ -10,7 +10,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command:: ["sh", "-c", "alembic upgrade head && fastapi run"]
+    command: ["sh", "-c", "alembic upgrade head && fastapi run"]
 
   db:
     image: postgres:17-alpine

@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError
 
 from .config import configure_logging, get_settings
-from .routers import auth, projects, tasks
+from .routers import auth, health, projects, tasks
 
 configure_logging(debug=get_settings().debug)
 logger = logging.getLogger(__name__)
@@ -18,6 +18,7 @@ app = FastAPI(
 )
 
 app.include_router(auth.router)
+app.include_router(health.router)
 app.include_router(projects.router)
 app.include_router(tasks.router)
 
