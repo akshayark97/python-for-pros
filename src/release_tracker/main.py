@@ -1,20 +1,33 @@
 import logging
 import time
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, Request, status
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import IntegrityError
 
+from . import __version__
 from .config import configure_logging, get_settings
 from .routers import auth, health, projects, tasks
 
-configure_logging(debug=get_settings().debug)
+APP_NAME = "Release Tracker API"
 logger = logging.getLogger(__name__)
+static_dir = Path(__file__).resolve().parent / "static"
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
+    configure_logging(debug=get_settings().debug)
+    yield
 
 app = FastAPI(
-    title="Release Tracker API",
+    title=APP_NAME,
+    version=__version__,
     description="An API for tracking project milestones and developer tasks.",
+    lifespan=lifespan
 )
 
 app.include_router(auth.router)
@@ -52,10 +65,21 @@ async def log_requests(request: Request, call_next: Any) -> Any:
     )
     return response
 
+app.mount("/app/static", StaticFiles(directory=static_dir), name="app-static")
 
-@app.get("/")
+@app.get("/app", include_in_schema=False)
+@app.get("/app/", include_in_schema=False)
+def frontend_dashboard() -> FileResponse:
+    logger.info("Serving dashboard")
+    return FileResponse(static_dir / "index.html")
+
+
+@app.get("/", tags=["meta"])
 def read_root() -> dict[str, str]:
+    logger.debug("Serving root metadata")
     return {
-        "app": "Release Tracker API",
+        "app": APP_NAME,
+        "version": __version__,
         "docs": "/docs",
+        "health": "/health",
     }

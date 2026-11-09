@@ -88,9 +88,22 @@ class Task(TaskBase, table=True):
     __tablename__ = "tasks"
 
     id: int | None = Field(default=None, primary_key=True)
-    project_id: int = Field(foreign_key="projects.id", index=True)
+    project_id: int = Field(
+        foreign_key="projects.id", ondelete="CASCADE", index=True
+    )  # noqa: E501
 
     project: Project = Relationship(back_populates="tasks")
+
+    created_at: datetime = Field(
+        default_factory=utc_now,
+        sa_column=Column(DateTime(timezone=True), nullable=False),
+    )
+    updated_at: datetime = Field(
+        default_factory=utc_now,
+        sa_column=Column(
+            DateTime(timezone=True), nullable=False, onupdate=utc_now
+        ),
+    )
 
     @property
     def project_name(self) -> str:
@@ -99,6 +112,7 @@ class Task(TaskBase, table=True):
     @property
     def project_slug(self) -> str:
         return self.project.slug
+
 
 class TaskCreate(TaskBase):
     pass
@@ -117,9 +131,11 @@ class TaskRead(TaskBase):
     project_id: int
     project_name: str
     project_slug: str
-
+    created_at: datetime
+    updated_at: datetime
 
 # --- User ---
+
 
 class UserBase(SQLModel):
     email: EmailStr = Field(unique=True)
@@ -143,6 +159,7 @@ class UserRead(UserBase):
 
 
 # --- Auth ---
+
 
 class AccessToken(SQLModel):
     access_token: str
