@@ -6,17 +6,17 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.pool import StaticPool
 
+os.environ.setdefault(
+    "JWT_SECRET_KEY",
+    "test-secret-key-for-pytest-only-32-bytes",
+)
+
 from release_tracker import crud
 from release_tracker.config import get_settings
 from release_tracker.database import get_engine, get_session
 from release_tracker.main import app
 from release_tracker.models import User
 from release_tracker.security import create_access_token
-
-os.environ.setdefault(
-    "JWT_SECRET_KEY",
-    "test-secret-key-for-pytest-only-32-bytes",
-)
 
 
 @pytest.fixture(name="session")
