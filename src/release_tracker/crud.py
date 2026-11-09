@@ -25,7 +25,7 @@ def slugify(value: str) -> str:
 
 
 def list_projects(session: Session) -> list[Project]:
-    # TODO: Build a select statement ordered by Project.name and return the list of all projects.
+    # TODO: Build a select statement ordered by Project.name and return the list of all projects.  # noqa: E501
     statement = select(Project).order_by(Project.name)
     return list(session.exec(statement).all())
 
@@ -36,7 +36,7 @@ def get_project(session: Session, project_id: int) -> Project | None:
 
 
 def create_project(session: Session, payload: ProjectCreate) -> Project:
-    # TODO: Build a Project from the payload, derive its slug, add/commit/refresh, return it.
+    # TODO: Build a Project from the payload, derive its slug, add/commit/refresh, return it.  # noqa: E501
     project = Project.model_validate(
         payload, update={"slug": slugify(payload.name)}
     )
@@ -50,7 +50,7 @@ def create_project(session: Session, payload: ProjectCreate) -> Project:
 def update_project(
     session: Session, project: Project, payload: ProjectUpdate
 ) -> Project:
-    # TODO: Apply payload to project (use exclude_unset=True so missing fields stay missing),
+    # TODO: Apply payload to project (use exclude_unset=True so missing fields stay missing),  # noqa: E501
     # re-slugify if the name was set, then add/commit/refresh.
 
     updated_fields = payload.model_dump(exclude_unset=True)
@@ -130,7 +130,7 @@ def delete_task(session: Session, task: Task) -> None:
     session.commit()
 
 
-def create_user(session: Session, *, email: str, password: str, is_active: bool = True) -> User:
+def create_user(session: Session, *, email: str, password: str, is_active: bool = True) -> User:  # noqa: E501
     user = User(
         email=email.lower(),
         hashed_password=get_password_hash(password),
